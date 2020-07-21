@@ -4,6 +4,7 @@ using Supermarket.Core.Contants;
 using Supermarket.Core.Entities;
 using Supermarket.Core.Models;
 using Supermarket.Core.Utilities;
+using Supermarket.Core.ViewModels;
 using SupermarketAPI.Core.Entities;
 using SupermarketAPI.DAL;
 using SupermarketAPI.DAL.Database;
@@ -18,7 +19,7 @@ namespace SupermarketAPI.Service
 {
     public interface IUserService
     {
-        AuthenModel Authenticate(string username, string password);
+        CurrentStaffViewModel Authenticate(string username, string password);
     }
 
     public class UserService : IUserService
@@ -39,7 +40,7 @@ namespace SupermarketAPI.Service
             _db = db;
         }
 
-        public AuthenModel Authenticate(string username, string password)
+        public CurrentStaffViewModel Authenticate(string username, string password)
         {
             //var user = _users.SingleOrDefault(x => x.Username == username && x.Password == password);
             var user = _db.Staffs.FirstOrDefault(s => s.Account == username && s.PasswordHash == EncodeUtilities.GetPasswordHash(password));
@@ -57,6 +58,7 @@ namespace SupermarketAPI.Service
                 Subject = new ClaimsIdentity(new Claim[]
                 {
                     new Claim(ClaimTypes.Name, user.Account),
+                    new Claim(ClaimTypes.SerialNumber, user.StaffId.ToString()),
                     new Claim(ClaimTypes.Role, currentRole)
                 }),
                 //Subject = new ClaimsIdentity(listCalim),
@@ -64,12 +66,12 @@ namespace SupermarketAPI.Service
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            var authenModel = new AuthenModel()
+            var authenModel = new CurrentStaffViewModel()
             {
                 Account = user.Account,
-                FullName = user.FullName,
                 StaffId = user.StaffId,
-                Role = currentRole,
+                StaffRole = user.StaffRole,
+                RoleString = currentRole,
                 Token = tokenHandler.WriteToken(token)
             };
 

@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+
 using Supermarket.Core.ViewModels;
 using SupermarketAPI.Core.Entities;
 using SupermarketAPI.DAL.Database;
 using Supperket.BLL.IBusiness;
-
+using System.Collections.Generic;
+using System.Linq;
 namespace SupermarketAPI.Controllers
 {
     [Route("api/[controller]")]
@@ -26,18 +23,18 @@ namespace SupermarketAPI.Controllers
         }
 
         // GET: api/Categories
+        //[Microsoft.AspNetCore.Authorization.Authorize]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
+        public ActionResult<IEnumerable<Category>> GetAll()
         {
-            //return await _context.Categories.ToListAsync();
+
             return _categoryBusiness.GetAll();
         }
 
         // GET: api/Categories/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Category>> GetCategory(int id)
+        public ActionResult<Category> GetById(int id)
         {
-            //var category = await _context.Categories.FindAsync(id);
             var category = _categoryBusiness.GetById(id);
 
             if (category == null)
@@ -52,30 +49,14 @@ namespace SupermarketAPI.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCategory(int id, Category category)
+        public IActionResult Put(int id, CategoryViewModel category)
         {
             if (id != category.CategoryId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(category).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CategoryExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            _categoryBusiness.Update(category);
 
             return NoContent();
         }
@@ -84,18 +65,16 @@ namespace SupermarketAPI.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
-        public async Task<ActionResult<Category>> PostCategory(CategoryViewModel category)
+        public ActionResult<Category> Post(CategoryViewModel category)
         {
-            //_context.Categories.Add(category);
-            //await _context.SaveChangesAsync();
             _categoryBusiness.Add(category);
 
-            return CreatedAtAction("GetCategory", new { id = category.CategoryId }, category);
+            return CreatedAtAction("GetById", new { id = category.CategoryId }, category);
         }
 
         // DELETE: api/Categories/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Category>> DeleteCategory(int id)
+        public ActionResult<Category> DeleteCategory(int id)
         {
             //var category = await _context.Categories.FindAsync(id);
             var category = _categoryBusiness.GetById(id);
@@ -103,16 +82,12 @@ namespace SupermarketAPI.Controllers
             {
                 return NotFound();
             }
-
-            //_context.Categories.Remove(category);
-            //await _context.SaveChangesAsync();
             _categoryBusiness.Delete(id);
             return category;
         }
 
         private bool CategoryExists(int id)
         {
-            //return _context.Categories.Any(e => e.CategoryId == id);
             return _categoryBusiness.GetById(id) != null;
         }
     }

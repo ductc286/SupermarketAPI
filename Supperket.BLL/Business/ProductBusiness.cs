@@ -62,9 +62,9 @@ namespace Supperket.BLL.Business
             return _productRepository.GetAll().OrderByDescending(p => p.ProductId).ToList();
         }
 
-        public Supplier GetById(object id)
+        public Product GetById(object id)
         {
-            throw new NotImplementedException();
+            return _productRepository.GetById(id);
         }
 
         public bool Update(ProductViewModel entity)

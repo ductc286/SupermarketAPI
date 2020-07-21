@@ -14,12 +14,12 @@ namespace Supperket.BLL.Business
     {
         private readonly ISupplierRepository _supplierRepository;
         private readonly IProductRepository _productRepository;
-        private readonly IPurchaseBillBusiness _purchaseBillBusiness;
-        public SupplierBusiness(ISupplierRepository supplierRepository, IProductRepository productRepository, IPurchaseBillBusiness purchaseBillBusiness)
+        private readonly IPurchaseBillRepository _purchaseBillRepository;
+        public SupplierBusiness(ISupplierRepository supplierRepository, IProductRepository productRepository, IPurchaseBillRepository purchaseBillRepository)
         {
             _supplierRepository = supplierRepository;
             _productRepository = productRepository;
-            _purchaseBillBusiness = purchaseBillBusiness;
+            _purchaseBillRepository = purchaseBillRepository;
         }
 
         public bool Add(SupplierViewModel entity)
@@ -45,7 +45,7 @@ namespace Supperket.BLL.Business
                 return false;
             }
             if (_productRepository.GetAll().Any(p => p.SupplierId == entity.SupplierId)
-                || _purchaseBillBusiness.GetAll().Any(p => p.SupplierId == entity.SupplierId))
+                || _purchaseBillRepository.GetAll().Any(p => p.SupplierId == entity.SupplierId))
             {
                 return false;
             }
@@ -55,7 +55,7 @@ namespace Supperket.BLL.Business
 
         public Supplier GetById(object id)
         {
-            throw new System.NotImplementedException();
+            return _supplierRepository.GetById(id);
         }
 
         public List<Supplier> GetAll()

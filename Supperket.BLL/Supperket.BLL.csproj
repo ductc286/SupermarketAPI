@@ -151,6 +151,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseBusiness\IBaseActionOfObject.cs" />
+    <Compile Include="BaseBusiness\ServiceBase.cs" />
     <Compile Include="Base\BaseService.cs" />
     <Compile Include="Base\IBaseService.cs" />
     <Compile Include="Business\CategoryBusiness.cs" />

@@ -15,6 +15,7 @@ using SupermarketAPI.Service;
 using Supperket.BLL.Business;
 using Supperket.BLL.IBusiness;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace SupermarketAPI
 {
@@ -73,6 +74,7 @@ namespace SupermarketAPI
             services.AddScoped<ISaleBillRepository, SaleBillRepository>();
             services.AddScoped<ISaleBillDetailRepository, SaleBillDetailRepository>();
             services.AddScoped<ISupplierRepository, SupplierRepository>();
+            services.AddScoped<IStaffRepository, StaffRepository>();
 
             //Scoped for Resositories
             services.AddScoped<ICategoryBusiness, CategoryBusiness>();
@@ -82,8 +84,11 @@ namespace SupermarketAPI
             services.AddScoped<ISaleBillBusiness, SaleBillBusiness>();
             services.AddScoped<IStatisticsBusiness, StatisticsBusiness>();
             services.AddScoped<ISupplierBusiness, SupplierBusiness>();
-            
+            services.AddScoped<IStaffBusiness, StaffBusiness>();
 
+            services.AddControllers().AddNewtonsoftJson(options =>
+            options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+            );
             //services.AddScoped<IStaffService, StaffService>();
         }
 

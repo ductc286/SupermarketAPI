@@ -1,10 +1,13 @@
-﻿using Supermarket.Core.Comon;
+﻿using Microsoft.EntityFrameworkCore;
+using Supermarket.Core.Comon;
 using Supermarket.Core.Utilities;
 using Supermarket.Core.ViewModels;
 using SupermarketAPI.Core.Entities;
+using SupermarketAPI.DAL.Database;
 using SupermarketAPI.DAL.GenericRepository;
 using SupermarketAPI.DataAccessLayer.IRepositories;
 using SupermarketAPI.DataAccessLayer.Repositories;
+using Supperket.BLL.BaseBusiness;
 using Supperket.BLL.IBusiness;
 using System;
 using System.Collections.Generic;
@@ -12,11 +15,12 @@ using System.Linq;
 
 namespace Supperket.BLL.Business
 {
-    public class PurchaseBillBusiness : IPurchaseBillBusiness
+    public class PurchaseBillBusiness : ServiceBase, IPurchaseBillBusiness
     {
         private readonly IPurchaseBillRepository _purchaseBillRepository;
         private readonly IPurchaseBillDetailRepository _purchaseBillDetailRepository;
-        public PurchaseBillBusiness(IPurchaseBillRepository purchaseBillRepository, IPurchaseBillDetailRepository purchaseBillDetailRepository)
+
+        public PurchaseBillBusiness(IPurchaseBillRepository purchaseBillRepository, IPurchaseBillDetailRepository purchaseBillDetailRepository, MyDBContext db) : base(db)
         {
             _purchaseBillRepository = purchaseBillRepository;
             _purchaseBillDetailRepository = purchaseBillDetailRepository;
@@ -37,7 +41,7 @@ namespace Supperket.BLL.Business
                 purchaseBillDetail.PurchaseBillId = purchaseBill.PurchaseBillId;
                 _purchaseBillDetailRepository.Add(purchaseBillDetail);
             }
-            
+
             return true;
         }
 
@@ -48,7 +52,10 @@ namespace Supperket.BLL.Business
 
         public List<PurchaseBill> GetAll()
         {
-            return _purchaseBillRepository.GetAll().OrderByDescending(p => p.CreatedDate).ToList();
+            //var result = _purchaseBillRepository.GetAll().OrderByDescending(p => p.CreatedDate).ToList();
+            var result = _db.PurchaseBills.AsQueryable().AsNoTracking().Include(p => p.PurchaseBillDetails).ThenInclude(pd => pd.Product)
+                .Include(p => p.Staff).Include(p => p.Supplier).ToList();
+            return result;
         }
 
         public PurchaseBill GetById(object id)

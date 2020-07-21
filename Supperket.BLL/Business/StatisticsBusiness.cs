@@ -1,18 +1,21 @@
-﻿using Supermarket.Core.ViewModels;
+﻿using Microsoft.EntityFrameworkCore;
+using Supermarket.Core.ViewModels;
+using SupermarketAPI.DAL.Database;
 using SupermarketAPI.DataAccessLayer.IRepositories;
+using Supperket.BLL.BaseBusiness;
 using Supperket.BLL.IBusiness;
 using System;
 using System.Linq;
 
 namespace Supperket.BLL.Business
 {
-    public class StatisticsBusiness : IStatisticsBusiness
+    public class StatisticsBusiness : ServiceBase, IStatisticsBusiness
     {
         IProductRepository _productRepository;
         ISaleBillRepository _saleBillRepository;
         IPurchaseBillRepository _purchaseBillRepository;
 
-        public StatisticsBusiness(IProductRepository productRepository, ISaleBillRepository saleBillRepository, IPurchaseBillRepository purchaseBillRepository)
+        public StatisticsBusiness(IProductRepository productRepository, ISaleBillRepository saleBillRepository, IPurchaseBillRepository purchaseBillRepository, MyDBContext db): base(db)
         {
             _productRepository = productRepository;
             _saleBillRepository = saleBillRepository;
@@ -60,9 +63,24 @@ namespace Supperket.BLL.Business
         public long CountProductsSoldByInterval(DateTime fromDate, DateTime toDate)
         {
             long sum = 0;
+            //try
+            //{
+            //    sum = _saleBillRepository.GetAll().Where(s =>
+            //(s.CreatedDate.Year > fromDate.Year
+            //    || (s.CreatedDate.Year == fromDate.Year && s.CreatedDate.Month > fromDate.Month
+            //    || (s.CreatedDate.Year == fromDate.Year && s.CreatedDate.Month == fromDate.Month && s.CreatedDate.Day >= fromDate.Day))
+            // ) &&
+            // (s.CreatedDate.Year < toDate.Year
+            //    || (s.CreatedDate.Year == toDate.Year && s.CreatedDate.Month < toDate.Month
+            //    || (s.CreatedDate.Year == toDate.Year && s.CreatedDate.Month == toDate.Month && s.CreatedDate.Day <= toDate.Day))
+            // )).Sum(p => p.SaleBillDetails.Sum(pd => (long)pd.Quantity));
+            //}
+            //catch (Exception)
+            //{
+            //}
             try
             {
-                sum = _saleBillRepository.GetAll().Where(s =>
+                 sum = _db.SaleBills.Include(s => s.SaleBillDetails).Where(s =>
             (s.CreatedDate.Year > fromDate.Year
                 || (s.CreatedDate.Year == fromDate.Year && s.CreatedDate.Month > fromDate.Month
                 || (s.CreatedDate.Year == fromDate.Year && s.CreatedDate.Month == fromDate.Month && s.CreatedDate.Day >= fromDate.Day))
@@ -70,7 +88,7 @@ namespace Supperket.BLL.Business
              (s.CreatedDate.Year < toDate.Year
                 || (s.CreatedDate.Year == toDate.Year && s.CreatedDate.Month < toDate.Month
                 || (s.CreatedDate.Year == toDate.Year && s.CreatedDate.Month == toDate.Month && s.CreatedDate.Day <= toDate.Day))
-             )).Sum(p => p.SaleBillDetails.Sum(pd => (long)pd.Quantity));
+             )).ToList().Sum(p => p.SaleBillDetails.Sum(pd => (long)pd.Quantity));
             }
             catch (Exception)
             {
@@ -85,7 +103,7 @@ namespace Supperket.BLL.Business
             long sum = 0;
             try
             {
-                sum = _purchaseBillRepository.GetAll().Where(s =>
+                sum = _db.PurchaseBills.Include(p => p.PurchaseBillDetails).Where(s =>
             (s.CreatedDate.Year > fromDate.Year
                 || (s.CreatedDate.Year == fromDate.Year && s.CreatedDate.Month > fromDate.Month
                 || (s.CreatedDate.Year == fromDate.Year && s.CreatedDate.Month == fromDate.Month && s.CreatedDate.Day >= fromDate.Day))
@@ -93,7 +111,7 @@ namespace Supperket.BLL.Business
              (s.CreatedDate.Year < toDate.Year
                 || (s.CreatedDate.Year == toDate.Year && s.CreatedDate.Month < toDate.Month
                 || (s.CreatedDate.Year == toDate.Year && s.CreatedDate.Month == toDate.Month && s.CreatedDate.Day <= toDate.Day))
-             )).Sum(p => p.PurchaseBillDetails.Sum(pd => (long)pd.Quantity));
+             )).ToList().Sum(p => p.PurchaseBillDetails.Sum(pd => (long)pd.Quantity));
             }
             catch (Exception)
             {

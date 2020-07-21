@@ -7,7 +7,7 @@ namespace Supperket.BLL.IBusiness
     public interface ISaleBillBusiness
     {
         SaleBill GetById(object id);
-        List<SaleBill> GetAll();
+        List<SaleBill> GetAll(string staffRole, int staffId);
         bool Delete(SaleBill saleBill);
         bool Add(SaleBillViewModel entity);
         bool Update(SaleBillViewModel entity);

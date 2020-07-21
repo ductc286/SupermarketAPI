@@ -1,9 +1,12 @@
-﻿using Supermarket.Core.Comon;
+﻿using Microsoft.EntityFrameworkCore;
+using Supermarket.Core.Comon;
+using Supermarket.Core.Contants;
 using Supermarket.Core.Utilities;
 using Supermarket.Core.ViewModels;
 using SupermarketAPI.Core.Entities;
+using SupermarketAPI.DAL.Database;
 using SupermarketAPI.DataAccessLayer.IRepositories;
-using SupermarketAPI.DataAccessLayer.Repositories;
+using Supperket.BLL.BaseBusiness;
 using Supperket.BLL.IBusiness;
 using System;
 using System.Collections.Generic;
@@ -11,11 +14,11 @@ using System.Linq;
 
 namespace Supperket.BLL.Business
 {
-    public class SaleBillBusiness : ISaleBillBusiness
+    public class SaleBillBusiness : ServiceBase, ISaleBillBusiness
     {
         private readonly ISaleBillRepository _saleBillRepository;
         private readonly ISaleBillDetailRepository _saleBillDetailRepository;
-        public SaleBillBusiness(ISaleBillRepository saleBillRepository, ISaleBillDetailRepository saleBillDetailRepository)
+        public SaleBillBusiness(ISaleBillRepository saleBillRepository, ISaleBillDetailRepository saleBillDetailRepository, MyDBContext db) : base(db)
         {
             _saleBillRepository = saleBillRepository;
             _saleBillDetailRepository = saleBillDetailRepository;
@@ -54,19 +57,20 @@ namespace Supperket.BLL.Business
             return true;
         }
 
-        public List<SaleBill> GetAll()
+        public List<SaleBill> GetAll(string staffRole, int staffId)
         {
-            if (StaffGlobal.CurrentStaff == null)
+            if (string.IsNullOrEmpty(staffRole))
             {
                 return null;
             }
-            else if (StaffGlobal.CurrentStaff.StaffRole == (int)EStaffRole.Administrator)
+            else if (staffRole == RoleConst.ADMIN)
             {
-                return _saleBillRepository.GetAll().OrderByDescending(s => s.CreatedDate).ToList();
+                return _db.SaleBills.AsQueryable().AsNoTracking().Include(s => s.SaleBillDetails).ThenInclude(sd => sd.Product).OrderByDescending(s => s.CreatedDate).ToList();
+                //return _saleBillRepository.GetAll().OrderByDescending(s => s.CreatedDate).ToList();
             }
             else
             {
-                return _saleBillRepository.FindAll(s => s.StaffId == StaffGlobal.CurrentStaff.StaffId).OrderByDescending(s => s.CreatedDate).ToList();
+                return _db.SaleBills.AsQueryable().AsNoTracking().Where(s => s.StaffId == staffId).Include(s => s.SaleBillDetails).ThenInclude(sd => sd.Product).OrderByDescending(s => s.CreatedDate).ToList();
             }
         }
 
